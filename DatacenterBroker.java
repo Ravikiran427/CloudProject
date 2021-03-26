@@ -3,6 +3,7 @@
 package org.cloudbus.cloudsim.examples.newcode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -336,7 +337,7 @@ public class DatacenterBroker extends SimEntity {
 	 * @pre $none
 	 * @post $none
 	 */
-	protected void submitCloudlets() {
+	protected void submitCloudlets1() {
 		
 		int vmIndex = 0;
 		List <Cloudlet> sortList= new ArrayList<Cloudlet>();
@@ -399,6 +400,100 @@ public class DatacenterBroker extends SimEntity {
 		for (Cloudlet cloudlet : getCloudletSubmittedList()) {
 			getCloudletList().remove(cloudlet);
 		}
+	}
+	
+	protected void submitCloudlets() {
+		
+		List<Integer> cPref0 = new ArrayList<>();
+		cPref0.add(0);
+		List<Integer> cPref1 = new ArrayList<>();
+		cPref1.add(0);
+		cPref1.add(1);
+		List<Integer> cPref2 = new ArrayList<>();
+		cPref2.add(1);
+		cPref2.add(0);
+		
+		List<List<Integer>> cPref = new ArrayList<>();
+		cPref.add(cPref0);
+		cPref.add(cPref1);
+		cPref.add(cPref2);
+		
+		List<List<Integer>> mPref = new ArrayList<>();
+		for(int i =0 ;i<getVmsCreatedList().size();i++) {
+			List<Integer> mPrefTemp = new ArrayList<>();
+			String prefs = getVmsCreatedList().get(i).getVmm();
+			for(int j =0;j<prefs.length();j++)
+				mPrefTemp.add(Integer.valueOf(prefs.charAt(j)));
+			mPref.add(mPrefTemp);
+		}
+		
+		List<List<Integer>> matching = new ArrayList<>(2);
+		
+		int[] jobStatus = new int[3];
+		int[] machineStatus = new int[2];
+		
+		List<Integer> freeJobs = new ArrayList<>();
+		freeJobs.add(0);
+		freeJobs.add(1);
+		freeJobs.add(2);
+		
+		int[] bestRejected = new int[2];
+		
+		int i = 0;
+		
+		while(!freeJobs.isEmpty()) {
+			while(!cPref.get(i).isEmpty()) {
+				int mostPrefM = cPref.get(i).get(0);
+				long mSize = getVmsCreatedList().get(mostPrefM).getCurrentAllocatedSize();
+				long jSize = getCloudletList().get(i).getCloudletLength();
+				if(mSize >= jSize) {
+					matching.get(mostPrefM).add(i);
+					getVmsCreatedList().get(mostPrefM).setSize(mSize-jSize);
+					jobStatus[i] = 1;
+					freeJobs.remove(freeJobs.indexOf(i));
+				}
+				else {
+					List<Integer> alreadyMatched = matching.get(mostPrefM);
+					List<Integer> lessPref = new ArrayList<>();
+					for(Integer j : alreadyMatched) {
+						if(mPref.get(mostPrefM).indexOf(i) < mPref.get(mostPrefM).indexOf(j)) {
+							lessPref.add(j);
+						}
+					}
+					
+					int k=0;
+					while(!lessPref.isEmpty() || getVmsCreatedList().get(mostPrefM).getCurrentAllocatedSize() >= jSize) {
+						jobStatus[k] = 0;
+						freeJobs.add(k);
+						getVmsCreatedList().get(mostPrefM).setSize(getVmsCreatedList().get(mostPrefM).getCurrentAllocatedSize() + getCloudletList().get(k).getCloudletLength());
+						bestRejected[mostPrefM] = k;
+					}
+					
+					if(mSize >= jSize) {
+						matching.get(mostPrefM).add(i);
+						getVmsCreatedList().get(mostPrefM).setSize(mSize-jSize);
+						jobStatus[i] = 1;
+						freeJobs.remove(freeJobs.indexOf(i));
+					}
+					else {
+						jobStatus[i] = 0;
+						freeJobs.add(i);
+					}
+					
+					for(int m : mPref.get(mostPrefM)) {
+						if(mPref.get(mostPrefM).indexOf(m) > mPref.get(mostPrefM).indexOf(bestRejected[mostPrefM])) {
+							mPref.get(mostPrefM).remove(mPref.get(mostPrefM).indexOf(m));
+							cPref.get(m).remove(cPref.get(m).indexOf(mostPrefM));
+						}
+					}
+				}
+			}
+		}
+		System.out.println("matching -----------------");
+		System.out.println(matching);
+		System.out.println(Arrays.toString(jobStatus));
+		
+		
 	}
 
 	/**
