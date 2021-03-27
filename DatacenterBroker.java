@@ -1,6 +1,6 @@
 
 
-package org.cloudbus.cloudsim.examples.newcode;
+package org.cloudbus.cloudsim.examples.finalcode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -427,7 +427,13 @@ public class DatacenterBroker extends SimEntity {
 			mPref.add(mPrefTemp);
 		}
 		
+		long[] mSizes = new long[mPref.size()];
+		mSizes[0] = 10000;
+		mSizes[1] = 10000;
+		
 		List<List<Integer>> matching = new ArrayList<>(2);
+		matching.add(new ArrayList<Integer>());
+		matching.add(new ArrayList<Integer>());
 		
 		int[] jobStatus = new int[3];
 		int[] machineStatus = new int[2];
@@ -442,13 +448,16 @@ public class DatacenterBroker extends SimEntity {
 		int i = 0;
 		
 		while(!freeJobs.isEmpty()) {
-			while(!cPref.get(i).isEmpty()) {
+			while(!cPref.get(i).isEmpty() && !freeJobs.isEmpty()) {
 				int mostPrefM = cPref.get(i).get(0);
-				long mSize = getVmsCreatedList().get(mostPrefM).getCurrentAllocatedSize();
+				long mSize = mSizes[mostPrefM];
 				long jSize = getCloudletList().get(i).getCloudletLength();
 				if(mSize >= jSize) {
-					matching.get(mostPrefM).add(i);
-					getVmsCreatedList().get(mostPrefM).setSize(mSize-jSize);
+					//matching.get(mostPrefM).add(i);
+					List<Integer> temp = matching.get(mostPrefM);
+					temp.add(i);
+					matching.set(mostPrefM, temp);
+					mSizes[mostPrefM] -= jSize;
 					jobStatus[i] = 1;
 					freeJobs.remove(freeJobs.indexOf(i));
 				}
@@ -462,16 +471,17 @@ public class DatacenterBroker extends SimEntity {
 					}
 					
 					int k=0;
-					while(!lessPref.isEmpty() || getVmsCreatedList().get(mostPrefM).getCurrentAllocatedSize() >= jSize) {
+					while(!lessPref.isEmpty() || mSizes[mostPrefM] >= jSize) {
 						jobStatus[k] = 0;
 						freeJobs.add(k);
-						getVmsCreatedList().get(mostPrefM).setSize(getVmsCreatedList().get(mostPrefM).getCurrentAllocatedSize() + getCloudletList().get(k).getCloudletLength());
+						mSizes[mostPrefM] = mSizes[mostPrefM] + getCloudletList().get(k).getCloudletLength();
 						bestRejected[mostPrefM] = k;
+						k++;
 					}
 					
 					if(mSize >= jSize) {
 						matching.get(mostPrefM).add(i);
-						getVmsCreatedList().get(mostPrefM).setSize(mSize-jSize);
+						mSizes[mostPrefM] -= jSize;
 						jobStatus[i] = 1;
 						freeJobs.remove(freeJobs.indexOf(i));
 					}
@@ -487,12 +497,25 @@ public class DatacenterBroker extends SimEntity {
 						}
 					}
 				}
+				i++;
+				i = i%3;
 			}
 		}
+		
 		System.out.println("matching -----------------");
 		System.out.println(matching);
 		System.out.println(Arrays.toString(jobStatus));
 		
+		for(int m = 0 ; m<matching.size();m++) {
+			for(int j=0;j<matching.get(m).size();j++) {
+				Log.printLine(CloudSim.clock() + ": " + getName() + ": Sending Cloudlet " + matching.get(m).get(j) + " to VM " + m);
+				Cloudlet cloudlet = getCloudletList().get(matching.get(m).get(j));
+				cloudlet.setVmId(getVmsCreatedList().get(m).getId());
+				sendNow(getVmsToDatacentersMap().get(m), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
+			}
+		}
+		
+		Simulation.setMSizes(mSizes); 
 		
 	}
 

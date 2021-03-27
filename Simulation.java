@@ -1,6 +1,6 @@
 
 
-package org.cloudbus.cloudsim.examples.newcode;
+package org.cloudbus.cloudsim.examples.finalcode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -39,6 +39,12 @@ public class Simulation {
 
 	/** The vmlist. */
 	private static List<Vm> vmlist;
+	
+	public static long[] mSizes;
+	
+	public static void setMSizes(long[] a) {
+		mSizes = a;
+	}
 
 	private static List<Vm> createVM(int userId, int vms) {
 
@@ -46,7 +52,7 @@ public class Simulation {
 		LinkedList<Vm> list = new LinkedList<Vm>();
 
 		//VM Parameters
-		long size = 10000; //image size (MB)
+		long size = 5000; //image size (MB)
 		int ram = 512; //vm memory (MB)
 		int mips = 1000;
 		long bw = 1000;
@@ -72,7 +78,7 @@ public class Simulation {
 //		
 		System.out.println("Printing Vms-----------------------");
 		for(Vm c : list)
-			System.out.println(c.getId()+"---"+c.getRam());
+			System.out.println(c.getId()+"---"+c.getCurrentAllocatedSize());
 
 
 		return list;
@@ -132,7 +138,7 @@ public class Simulation {
 	 * Creates main() to run this example
 	 */
 	public static void main(String[] args) {
-		Log.printLine("Starting CloudSimExample6...");
+		Log.printLine("Starting Revised DA Simulation...");
 
 		try {
 			// First step: Initialize the CloudSim package. It should be called
@@ -174,7 +180,7 @@ public class Simulation {
 			//datacenter0.printDebts();
 			//datacenter1.printDebts();
 
-			Log.printLine("CloudSimExample6 finished!");
+			Log.printLine("Revised DA finished!");
 		}
 		catch (Exception e)
 		{
@@ -324,7 +330,7 @@ public class Simulation {
 		Log.printLine();
 		Log.printLine("========== OUTPUT ==========");
 		Log.printLine("Cloudlet ID" + indent + "STATUS" + indent +
-				"Data center ID" + indent + "VM ID" + indent + indent + "Time" + indent + "Start Time" + indent + "Finish Time" +indent+"user id"+indent);
+				"Data center ID" + indent + "VM ID" + indent + indent + "Time" + indent + "Start Time" + indent + "Finish Time" +indent+"user id"+indent + "rem. size in VM");
 
 		DecimalFormat dft = new DecimalFormat("###.##");
 		for (int i = 0; i < size; i++) {
@@ -334,9 +340,9 @@ public class Simulation {
 			if (cloudlet.getCloudletStatus() == Cloudlet.SUCCESS){
 				Log.print("SUCCESS");
 
-				Log.printLine( indent + indent + cloudlet.getResourceId() + indent + indent + indent + cloudlet.getVmId() +
-						indent + indent + indent + dft.format(cloudlet.getActualCPUTime()) +
-						indent + indent + dft.format(cloudlet.getExecStartTime())+ indent + indent + indent + dft.format(cloudlet.getFinishTime())+indent +cloudlet.getUserId());
+				Log.printLine("\t\t" + cloudlet.getResourceId() + "\t   " + cloudlet.getVmId() +
+						"\t\t" + dft.format(cloudlet.getActualCPUTime()) +
+						"\t" + dft.format(cloudlet.getExecStartTime())+ indent + indent + indent + dft.format(cloudlet.getFinishTime())+ "\t\t" +cloudlet.getUserId() + "\t" + mSizes[cloudlet.getVmId()]);
 				
 								
 			}
