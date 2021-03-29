@@ -12,7 +12,7 @@ import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletSchedulerSpaceShared;
 import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.Datacenter;
-import org.cloudbus.cloudsim.examples.newcode.DatacenterBroker;
+import org.cloudbus.cloudsim.examples.finalcode.DatacenterBroker;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Log;
@@ -28,10 +28,7 @@ import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 
-/**
- * An example showing how to create
- * scalable simulations.
- */
+
 public class Simulation {
 
 	/** The cloudlet list. */
@@ -76,7 +73,7 @@ public class Simulation {
 //			list.add(vm[i]);
 //		}
 //		
-		System.out.println("Printing Vms-----------------------");
+		System.out.println("--------Printing Vms-----------------------");
 		for(Vm c : list)
 			System.out.println(c.getId()+"---"+c.getCurrentAllocatedSize());
 
@@ -97,25 +94,7 @@ public class Simulation {
 		UtilizationModel utilizationModel = new UtilizationModelFull();
 
 		Cloudlet[] cloudlet = new Cloudlet[cloudlets];
-//		Random r = new Random();
-//		
-//		List<String> vmPreference0 = new ArrayList();
-//		vmPreference0.add("0");
-//		cloudlet[0] = new Cloudlet(0, length+r.nextInt(2000), 1, 300, 300, utilizationModel, utilizationModel, utilizationModel, vmPreference0);
-//		
-//		List<String> vmPreference1 = new ArrayList();
-//		vmPreference1.add("0");
-//		vmPreference1.add("1");
-//		cloudlet[1] = new Cloudlet(1, length+r.nextInt(2000), 1, 300, 300, utilizationModel, utilizationModel, utilizationModel, vmPreference1);
-//		
-//		List<String> vmPreference2 = new ArrayList();
-//		vmPreference2.add("1");
-//		vmPreference2.add("0");
-//		cloudlet[2] = new Cloudlet(2, length+r.nextInt(2000), 1, 300, 300, utilizationModel, utilizationModel, utilizationModel, vmPreference2);
-//
-//		list.add(cloudlet[0]);
-//		list.add(cloudlet[1]);
-//		list.add(cloudlet[2]);
+
 		for(int i=0;i<cloudlets;i++){
 			Random r= new Random();
 			cloudlet[i] = new Cloudlet(i, length +r.nextInt(2000), pesNumber, fileSize, outputSize, utilizationModel, utilizationModel, utilizationModel);
@@ -151,7 +130,7 @@ public class Simulation {
 			CloudSim.init(num_user, calendar, trace_flag);
 
 			// Second step: Create Datacenters
-			//Datacenters are the resource providers in CloudSim. We need at list one of them to run a CloudSim simulation
+			//Datacenters are the resource providers in CloudSim.
 			Datacenter datacenter0 = createDatacenter("Datacenter_0");
 			Datacenter datacenter1 = createDatacenter("Datacenter_1");
 
@@ -160,8 +139,8 @@ public class Simulation {
 			int brokerId = broker.getId();
 
 			//Fourth step: Create VMs and Cloudlets and send them to broker
-			vmlist = createVM(brokerId,2); //creating 20 vms
-			cloudletList = createCloudlet(brokerId,3); // creating 40 cloudlets
+			vmlist = createVM(brokerId,2); //creating 2 vms
+			cloudletList = createCloudlet(brokerId,3); // creating 3 cloudlets
 
 			broker.submitVmList(vmlist);
 			broker.submitCloudletList(cloudletList);
@@ -176,9 +155,6 @@ public class Simulation {
 
 			printCloudletList(newList);
 
-			//Print the debt of each user to each datacenter
-			//datacenter0.printDebts();
-			//datacenter1.printDebts();
 
 			Log.printLine("Revised DA finished!");
 		}
@@ -248,31 +224,7 @@ public class Simulation {
     		); // Second machine
 
 
-		//To create a host with a space-shared allocation policy for PEs to VMs:
-		//hostList.add(
-    	//		new Host(
-    	//			hostId,
-    	//			new CpuProvisionerSimple(peList1),
-    	//			new RamProvisionerSimple(ram),
-    	//			new BwProvisionerSimple(bw),
-    	//			storage,
-    	//			new VmSchedulerSpaceShared(peList1)
-    	//		)
-    	//	);
-
-		//To create a host with a oportunistic space-shared allocation policy for PEs to VMs:
-		//hostList.add(
-    	//		new Host(
-    	//			hostId,
-    	//			new CpuProvisionerSimple(peList1),
-    	//			new RamProvisionerSimple(ram),
-    	//			new BwProvisionerSimple(bw),
-    	//			storage,
-    	//			new VmSchedulerOportunisticSpaceShared(peList1)
-    	//		)
-    	//	);
-
-
+		
 		// 5. Create a DatacenterCharacteristics object that stores the
 		//    properties of a data center: architecture, OS, list of
 		//    Machines, allocation policy: time- or space-shared, time zone
@@ -302,8 +254,7 @@ public class Simulation {
 		return datacenter;
 	}
 
-	//We strongly encourage users to develop their own broker policies, to submit vms and cloudlets according
-	//to the specific rules of the simulated scenario
+
 	private static DatacenterBroker createBroker(){
 
 		

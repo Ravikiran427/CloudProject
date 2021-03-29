@@ -69,15 +69,7 @@ public class DatacenterBroker extends SimEntity {
 	/** The datacenter characteristics list. */
 	protected Map<Integer, DatacenterCharacteristics> datacenterCharacteristicsList;
 
-	/**
-	 * Created a new DatacenterBroker object.
-	 * 
-	 * @param name name to be associated with this entity (as required by Sim_entity class from
-	 *            simjava package)
-	 * @throws Exception the exception
-	 * @pre name != null
-	 * @post $none
-	 */
+	
 	public DatacenterBroker(String name) throws Exception {
 		super(name);
 
@@ -101,10 +93,6 @@ public class DatacenterBroker extends SimEntity {
 	/**
 	 * This method is used to send to the broker the list with virtual machines that must be
 	 * created.
-	 * 
-	 * @param list the list
-	 * @pre list !=null
-	 * @post $none
 	 */
 	public void submitVmList(List<? extends Vm> list) {
 		getVmList().addAll(list);
@@ -112,10 +100,6 @@ public class DatacenterBroker extends SimEntity {
 
 	/**
 	 * This method is used to send to the broker the list of cloudlets.
-	 * 
-	 * @param list the list
-	 * @pre list !=null
-	 * @post $none
 	 */
 	public void submitCloudletList(List<? extends Cloudlet> list) {
 		getCloudletList().addAll(list);
@@ -123,12 +107,6 @@ public class DatacenterBroker extends SimEntity {
 
 	/**
 	 * Specifies that a given cloudlet must run in a specific virtual machine.
-	 * 
-	 * @param cloudletId ID of the cloudlet being bount to a vm
-	 * @param vmId the vm id
-	 * @pre cloudletId > 0
-	 * @pre id > 0
-	 * @post $none
 	 */
 	public void bindCloudletToVm(int cloudletId, int vmId) {
 		CloudletList.getById(getCloudletList(), cloudletId).setVmId(vmId);
@@ -173,10 +151,6 @@ public class DatacenterBroker extends SimEntity {
 
 	/**
 	 * Process the return of a request for the characteristics of a PowerDatacenter.
-	 * 
-	 * @param ev a SimEvent object
-	 * @pre ev != $null
-	 * @post $none
 	 */
 	protected void processResourceCharacteristics(SimEvent ev) {
 		DatacenterCharacteristics characteristics = (DatacenterCharacteristics) ev.getData();
@@ -190,10 +164,6 @@ public class DatacenterBroker extends SimEntity {
 
 	/**
 	 * Process a request for the characteristics of a PowerDatacenter.
-	 * 
-	 * @param ev a SimEvent object
-	 * @pre ev != $null
-	 * @post $none
 	 */
 	protected void processResourceCharacteristicsRequest(SimEvent ev) {
 		setDatacenterIdsList(CloudSim.getCloudResourceList());
@@ -209,10 +179,6 @@ public class DatacenterBroker extends SimEntity {
 
 	/**
 	 * Process the ack received due to a request for VM creation.
-	 * 
-	 * @param ev a SimEvent object
-	 * @pre ev != null
-	 * @post $none
 	 */
 	protected void processVmCreate(SimEvent ev) {
 		int[] data = (int[]) ev.getData();
@@ -261,10 +227,6 @@ public class DatacenterBroker extends SimEntity {
 
 	/**
 	 * Process a cloudlet return event.
-	 * 
-	 * @param ev a SimEvent object
-	 * @pre ev != $null
-	 * @post $none
 	 */
 	protected void processCloudletReturn(SimEvent ev) {
 		Cloudlet cloudlet = (Cloudlet) ev.getData();
@@ -333,74 +295,7 @@ public class DatacenterBroker extends SimEntity {
 
 	/**
 	 * Submit cloudlets to the created VMs.
-	 * 
-	 * @pre $none
-	 * @post $none
 	 */
-	protected void submitCloudlets1() {
-		
-		int vmIndex = 0;
-		List <Cloudlet> sortList= new ArrayList<Cloudlet>();
-		ArrayList<Cloudlet> tempList = new ArrayList<Cloudlet>();
-		
-		for(Cloudlet cloudlet: getCloudletList())
-		{
-			tempList.add(cloudlet);
-		}
-		
-		int totalCloudlets= tempList.size();
-		for(int i=0;i<totalCloudlets;i++)
-		{
-	
-			Cloudlet smallestCloudlet= tempList.get(0);
-			for(Cloudlet checkCloudlet: tempList)
-			{
-				if(smallestCloudlet.getCloudletLength()>checkCloudlet.getCloudletLength())
-				{
-					smallestCloudlet= checkCloudlet;
-					}
-				}
-				sortList.add(smallestCloudlet);
-				tempList.remove(smallestCloudlet);
-				
-		}
-		
-		int count=1;
-		for(Cloudlet printCloudlet: sortList)
-		{
-			Log.printLine(count+".Cloudler Id:"+printCloudlet.getCloudletId()+",Cloudlet Length:"+printCloudlet.getCloudletLength());
-		    count++;
-		}
-		
-		
-		for (Cloudlet cloudlet : sortList) {
-			Vm vm;
-			// if user didn't bind this cloudlet and it has not been executed yet
-			if (cloudlet.getVmId() == -1) {
-				vm = getVmsCreatedList().get(vmIndex);
-			} else { // submit to the specific vm
-				vm = VmList.getById(getVmsCreatedList(), cloudlet.getVmId());
-				if (vm == null) { // vm was not created
-					Log.printLine(CloudSim.clock() + ": " + getName() + ": Postponing execution of cloudlet "
-							+ cloudlet.getCloudletId() + ": bount VM not available");
-					continue;
-				}
-			}
-
-			Log.printLine(CloudSim.clock() + ": " + getName() + ": Sending cloudlet "
-					+ cloudlet.getCloudletId() + " to VM #" + vm.getId());
-			cloudlet.setVmId(vm.getId());
-			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
-			cloudletsSubmitted++;
-			vmIndex = (vmIndex + 1) % getVmsCreatedList().size();
-			getCloudletSubmittedList().add(cloudlet);
-		}
-
-		// remove submitted cloudlets from waiting list
-		for (Cloudlet cloudlet : getCloudletSubmittedList()) {
-			getCloudletList().remove(cloudlet);
-		}
-	}
 	
 	protected void submitCloudlets() {
 		
@@ -521,9 +416,6 @@ public class DatacenterBroker extends SimEntity {
 
 	/**
 	 * Destroy the virtual machines running in datacenters.
-	 * 
-	 * @pre $none
-	 * @post $none
 	 */
 	protected void clearDatacenters() {
 		for (Vm vm : getVmsCreatedList()) {
@@ -536,27 +428,17 @@ public class DatacenterBroker extends SimEntity {
 
 	/**
 	 * Send an internal event communicating the end of the simulation.
-	 * 
-	 * @pre $none
-	 * @post $none
 	 */
 	protected void finishExecution() {
 		sendNow(getId(), CloudSimTags.END_OF_SIMULATION);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.core.SimEntity#shutdownEntity()
-	 */
 	@Override
 	public void shutdownEntity() {
 		Log.printLine(getName() + " is shutting down...");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.core.SimEntity#startEntity()
-	 */
+
 	@Override
 	public void startEntity() {
 		Log.printLine(getName() + " is starting...");
