@@ -73,9 +73,9 @@ public class Simulation {
 //			list.add(vm[i]);
 //		}
 //		
-		System.out.println("--------Printing Vms-----------------------");
-		for(Vm c : list)
-			System.out.println(c.getId()+"---"+c.getCurrentAllocatedSize());
+//		System.out.println("--------Printing Vms-----------------------");
+//		for(Vm c : list)
+//			System.out.println(c.getId()+"---"+c.getCurrentAllocatedSize());
 
 
 		return list;
